@@ -85,6 +85,7 @@ ReactiveX 라이브러리를 스위프트 언어로 구현한 것
 여러 개의 소스 Observable들을 하나의 Observable로 만드는 연산자들
 
 1. concat 연산자
+<img width="500" height="200" alt="concat" src="https://user-images.githubusercontent.com/70764912/117155825-14f49500-adf8-11eb-9205-94964bd603df.png">
 
    두 개의 옵저버블을 결합함
 
@@ -126,7 +127,7 @@ ReactiveX 라이브러리를 스위프트 언어로 구현한 것
    
 
 2. startWith 연산자
-
+<img width="500" height="200" alt="startwith" src="https://user-images.githubusercontent.com/70764912/117161703-1d030380-adfd-11eb-8e9f-a39bb7434783.png">
    Observable이 항목을 배출하기 전에 다른 항목들을 앞에 추가하는 연산자
 
    주로 기본값이나 시작값을 저장할때 활용함 , last in first out 방식임
@@ -153,7 +154,7 @@ ReactiveX 라이브러리를 스위프트 언어로 구현한 것
    ```
 
 3. merge연산자
-
+<img width="500" height="200" alt="merge" src="https://user-images.githubusercontent.com/70764912/117161853-386e0e80-adfd-11eb-8ee6-2e77df12f485.png">
    복수 개의 Observable들이 배출하는 항목들을 머지시켜 하나의 Observable이 방출하도록 병합함
 
    merge로 병합할 수 있는 Observable의 수는 제한이 없음
@@ -199,7 +200,7 @@ ReactiveX 라이브러리를 스위프트 언어로 구현한 것
    ```
 
 4. combineLatest 연산자
-
+<img width="500" height="200" alt="combineLatest" src="https://user-images.githubusercontent.com/70764912/117161937-4e7bcf00-adfd-11eb-81ea-318c7933392e.png">
    Observable이 방출하는 최소 요소를 병합하는 연산자
 
    두개의 Observable과 클로저를 파라미터로 받음
@@ -239,7 +240,7 @@ ReactiveX 라이브러리를 스위프트 언어로 구현한 것
    ```
 
 5. withLatestFrom 연산자
-
+<img width="500" height="200" alt="withLatestFrom" src="https://user-images.githubusercontent.com/70764912/117162018-618e9f00-adfd-11eb-87af-2e214c93286f.png">
    ```swift
    triggerObservable.withLatestFrom(dataObservable)
    ```
@@ -283,7 +284,7 @@ ReactiveX 라이브러리를 스위프트 언어로 구현한 것
    
 
 6. zip 연산자
-
+<img width="500" height="200" alt="zip" src="https://user-images.githubusercontent.com/70764912/117162103-7408d880-adfd-11eb-9edd-da4c9500f83a.png">
    결합한다는 점에서 combineLatest와 동일하지만 순서를 맞춰서 결합함(인덱스를 기준으로 짝을 맞춰서 전달함)
 
    (첫번째 요소는 첫번째 요소와 결합하고 두번째 요소는 두번째 요소와 결합함)
@@ -412,7 +413,7 @@ ReactiveX 라이브러리를 스위프트 언어로 구현한 것
    ```
 
 9. reduce 연산자
-
+<img width="500" height="200" alt="reduce" src="https://user-images.githubusercontent.com/70764912/117163781-f5ad3600-adfe-11eb-8551-714b4c0e652e.png">
    Seed 값과 accumulator 클로저를 parameter로 받아서 옵저버블을 통해서 옵저버에게 결과를 방출함
 
    최종 결과만 필요하면 reduce연산자를 사용하면 되고 중간 결과와 최종 결과 모두 필요하면 변환 연산자의 scan연산자를 사용하면 됨.

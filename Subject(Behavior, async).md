@@ -2,6 +2,14 @@
 
 * 우리가 개발을 할때 실시간으로 observable에 값을 추가하고 subscriber를 할 수 있는 것이 필요함. 이때 사용하는 것이 subject!!
 
+* Observable에는 "hot observable"과 "cold observable"이 있는데 subject는 cold observable을 hot하게 변형 것과 같음
+
+  (https://brunch.co.kr/@tilltue/18)
+
+  (https://github.com/ReactiveX/RxSwift/blob/main/Documentation/HotAndColdObservables.md)
+
+   hot observable과 cold observable에 대해서 잘 설명되어 있어서 링크 첨부할께요 !)
+
 - Observable인 동시에 Observer임. 두가지 역할을 할 수 있음.
 
 --------------------------------------------------------------------------------------------------------
@@ -20,9 +28,11 @@ subject는 multicast방식으로 여러개의 observer를 subscribe할 수 있�
 
 ​	publishsubject이랑 유사하지만 초기 값을 가지고 생성된다는 점이 다름
 
-​	구독자는 구독시에 값이 없다면 default값을 받고 값이 있다면 최신 값을 받음
+​	구독자는 구독시에 값이 없다면 default값을 받고 구독시에 값이 있다면 최신 값을 받음
 
-​	언제 사용?? 보통 뷰를 가장 최신의 데이터로 미리 세팅할 때 
+​	구독자가 새로 추가되어도 저장된 가장 최신의 값이 전달됨.
+
+​	언제 사용?? 보통 뷰를 가장 최신의 데이터로 미리 세팅할 때, 최신의 값이 중요하거나 최초 subscribe시 이벤트가 바로 전달 될때 사용
 
 ![D4FD318F-FEA1-4839-B921-3486FDE166AF_1_105_c](https://user-images.githubusercontent.com/70764912/117772323-054ed380-b272-11eb-8643-c71f6ce3182b.jpeg)
 
@@ -33,21 +43,21 @@ enum MyError: Error {
    case error
 }
 
-let one = BehaviorSubject<String>(value: "Behavior")
+let one = BehaviorSubject<String>(value: "Behavior")   //subject가 behavior을 디폴트 값으로 가지고 생성됨.
 
-one.subscribe{print("Subject1:",$0)}
-    .disposed(by: disposeBag)
+one.subscribe{print("Subject1:",$0)} //구독시에 subject에 최신 값이 없으므로 생성될때 가진 디폴트값 전달됨 
+    .disposed(by: disposeBag)       //Subject1: next(Behavior) 출력
 
-one.onNext("subject")
+one.onNext("subject")      //이벤트 전달시 구독자에게 subject값 전달  //Subject1: next(subject) 출력
 
-one.onNext("Hello")
+one.onNext("Hello")        //Subject1: next(Hello) 출력
 
-one.subscribe{print("Subject2:",$0)}
-    .disposed(by: disposeBag)
+one.subscribe{print("Subject2:",$0)}   //새로운 구독자가 추가되면 가장 최신의 값 전달됨
+    .disposed(by: disposeBag)     //Subejct2: next(Hello) 출력
 
-one.onNext("world")
-
-one.onCompleted()
+one.onNext("world")        //새로운 이벤트 발생하면 모든 구독자에게 전달함
+                           //Subject1: next(world), Subject2: next(world) 출력
+one.onCompleted()           //completed이벤트 발생하면 모든 구독자에게 이벤트 전달함
 ```
 
 출력결과는?
@@ -63,50 +73,12 @@ Subject1: completed
 Subject2: completed
 ```
 
-즉 Behaviorsubject를 생성하면 내부에 next이벤트가 하나 만들어지는것 , 그리고 이것을 구독하는 구독자가 추가되면 저장된 next이벤트가 바로 전달됨.
+즉 Behaviorsubject를 생성하면 내부에 next이벤트가 하나 만들어지는것 , 그리고 이것을 구독하는 구독자가 추가되면 저장된 최신의 next이벤트가 바로 전달됨.
 
-:exclamation:새로운 옵저버를 추가하면?
-
-```swift
-let disposeBag = DisposeBag()
-
-enum MyError: Error {
-   case error
-}
-
-let one = BehaviorSubject<String>(value: "Behavior")
-
-one.subscribe{print("Subject1:",$0)}
-    .disposed(by: disposeBag)
-
-one.onNext("subject")
-
-one.subscribe{print("Subject2:",$0)}
-    .disposed(by: disposeBag)
-
-one.onNext("world")
-
-one.onCompleted()
-```
-
-```swift
-Subject1: next(Behavior)
-Subject1: next(subject)
-Subject2: next(subject)    //가장 최신의 이벤트 전달됨
-Subject1: next(world)
-Subject2: next(world)      //가장 최신의 이벤트 전달됨
-Subject1: completed
-Subject2: completed
-```
-
-이후 새로운 옵저버가 추가되면 항상 가장 최신의 이벤트를 옵저버가 받고 시작함
-
-:exclamation:error이벤트가 전달되면? :
+:exclamation:error이벤트가 전달되면? : Behavior subject에서 에러가 나면 subscribe하고 있는 모든 옵저버에서 error남
 
 <img width="791" alt="B1507166-185B-4C1F-A02D-4ECD5DBFF37B" src="https://user-images.githubusercontent.com/70764912/117772605-5068e680-b272-11eb-8454-156b88d08d63.png">
 
-Behavior subject에서 에러가 나면 subscribe하고 있는 모든 옵저버에서 error남
-
 ```swift
 let disposeBag = DisposeBag()
 
@@ -114,17 +86,18 @@ enum MyError: Error {
    case error
 }
 
-let one = BehaviorSubject<String>(value: "Behavior")
+let one = BehaviorSubject<String>(value: "Behavior")   //"Behavior"을 디폴트 값으로 가지고 subject가 생성됨.
 
-one.subscribe{print("Subject1:",$0)}
+one.subscribe{print("Subject1:",$0)}     //구독시 디폴트 값이 전달됨
+    .disposed(by: disposeBag)            //Subject1: next(Behavior) 출력됨.
+
+one.onNext("subject")      //Subject1: next(subject)
+
+one.onError(MyError.error)     //에러 이벤트 발생함
+
+one.subscribe{print("Subject2:",$0)}     //새로운 구독자 추가함
     .disposed(by: disposeBag)
-
-one.onNext("subject")
-
-one.onError(MyError.error)
-
-one.subscribe{print("Subject2:",$0)}
-    .disposed(by: disposeBag)
+                            //모든 옵저버에게 error이벤트 전달함 //Subject1: error(error) Subject2: error(error) 출력함 
 ```
 
 출력결과는? 구독하고 있는 모든 옵저버로 error이벤트가 전달됨
@@ -142,9 +115,9 @@ Subject2: error(error)
 
 :exclamation:다른 Subject들과 이벤트를 옵저버에게 전달하는 시점에서 차이가 있음
 
-subject로 completed이벤트가 구독되기전까지 어떠한 이벤트도 전달되지 않음
+subject로부터 completed이벤트가 전달되기 전까지 어떠한 이벤트도 전달되지 않음
 
-completed이벤트가 전달되면 그 시점의 가장 최근의 next이벤트를 구독자에게 전달함
+completed이벤트가 전달되면 그 시점의 가장 최근의 next이벤트를 구독자에게 전달함.
 
 ![DE4A3BC7-DA72-4647-BD0A-B348D580A6BD_1_105_c](https://user-images.githubusercontent.com/70764912/117788314-418a3000-b282-11eb-927a-5e330e91c0f6.jpeg)
 
@@ -155,20 +128,22 @@ enum MyError: Error {
    case error
 }
 
-let subject = AsyncSubject<String>()
+let subject = AsyncSubject<String>()    //AsyncSubject가 생성됨.
 
-subject.subscribe{(print($0))}
+subject.subscribe{(print($0))}      //구독해도 구독자에게 아무런 이벤트 전달되지 않음
     .disposed(by: bag)
 
 subject.onNext("aaa")    //이벤트 전달되지 않음
 subject.onNext("bbb")    //이벤트 전달되지 않음
 
 subject.subscribe{(print($0))}
-    .disposed(by: bag)
+    .disposed(by: bag)            //구독자에게 아무런 이벤트 전달되지 않음
 
 subject.onNext("ccc")    //이벤트 전달되지 않음
 
-subject.onCompleted()    //가장 최근의 이벤트를 전달함
+subject.onCompleted()    //completed이벤트 전달 시에 구독자에게 가장 최신의 이벤트를 전달함
+                         //next(ccc), next(ccc)출력됨
+                         //completed, completed 출력됨
 ```
 
 결과는??
@@ -180,7 +155,7 @@ completed
 completed
 ```
 
-:exclamation:error이벤트가 전달되면??
+:exclamation:error이벤트가 전달되면?? 가장 최신의 값 전달하지 않고 구독자들에게 에러이벤트 전달하고 끝남
 
 ![0A8A3909-70E1-47DB-B79E-11A6AF0FBDE2_1_105_c](https://user-images.githubusercontent.com/70764912/117788395-549d0000-b282-11eb-8445-c74407109c20.jpeg)
 
@@ -191,18 +166,18 @@ enum MyError: Error {
    case error
 }
 
-let subject = AsyncSubject<String>()
+let subject = AsyncSubject<String>()   //AsynSubject 생성됨
 
-subject.subscribe{(print($0))}
+subject.subscribe{(print($0))}       //구독자 추가됨
     .disposed(by: bag)
 
-subject.onNext("aaa")
-subject.onNext("bbb")
+subject.onNext("aaa")     //구독자에게 아무런 이벤트 전달하지 않음
+subject.onNext("bbb")     //구독자에게 아무런 이벤트 전달하지 않음
 
 subject.subscribe{(print($0))}
-    .disposed(by: bag)
+    .disposed(by: bag)           //구독자 추가됨.
 
-subject.onNext("ccc")
+subject.onNext("ccc")         //구독자에게 아무런 이벤트 전달하지 않음
 
 subject.onError(MyError.error)  //최근의 이벤트가 전달되지 않고 구독자들에게 에러 이벤트를 전달함
 ```

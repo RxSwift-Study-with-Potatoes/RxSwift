@@ -4,11 +4,15 @@
 
 * Observable에는 "hot observable"과 "cold observable"이 있는데 subject는 cold observable을 hot하게 변형 것과 같음
 
+  hot observable : 생성과 동시에 이벤트를 방출함
+
+  cold observable : 옵저버가 subscribe되는 시점부터 이벤트를 생성하여 방출함.
+
   (https://brunch.co.kr/@tilltue/18)
 
   (https://github.com/ReactiveX/RxSwift/blob/main/Documentation/HotAndColdObservables.md)
 
-   hot observable과 cold observable에 대해서 잘 설명되어 있어서 링크 첨부할께요 !)
+  (https://taehyungk.github.io/posts/android-RxJava2-Cold-Hot-Observable-and-Subject/)
 
 - Observable인 동시에 Observer임. 두가지 역할을 할 수 있음.
 
